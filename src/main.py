@@ -17,7 +17,15 @@ async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ):
-    print("VALIDATION ERROR:", exc.errors())
+    if (
+        request.method == "PATCH"
+        and request.url.path.startswith("/api/v1/theater/movies/")
+    ):
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Invalid input data."},
+        )
+
     if request.method == "GET":
         return JSONResponse(
             status_code=422,

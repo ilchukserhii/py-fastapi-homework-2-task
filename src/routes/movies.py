@@ -92,21 +92,22 @@ async def create_film(movie: MovieCreateSchema, db: AsyncSession = Depends(get_d
         db.add(country_obj)
 
     new_movie.country = country_obj
+    db.add(new_movie)
 
-    new_movie.actors = await get_or_create_related(
-        ActorModel, movie.actors, db
-    )
+    with db.no_autoflush:
+        new_movie.actors = await get_or_create_related(
+            ActorModel, movie.actors, db
+        )
 
-    new_movie.genres = await get_or_create_related(
-        GenreModel, movie.genres, db
-    )
+        new_movie.genres = await get_or_create_related(
+            GenreModel, movie.genres, db
+        )
 
-    new_movie.languages = await get_or_create_related(
-        LanguageModel, movie.languages, db
-    )
+        new_movie.languages = await get_or_create_related(
+            LanguageModel, movie.languages, db
+        )
 
     try:
-        db.add(new_movie)
         await db.commit()
     except IntegrityError as exc:
         await db.rollback()
